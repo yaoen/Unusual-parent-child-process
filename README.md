@@ -35,6 +35,7 @@
  Event Viewer -> Applications and Services Logs -> Microsoft -> Windows -> Sysmon
  ```
  4. Sysmon logs can be saved as csv
+ 5. Sysmon configuration file can be modified to include other events
 
 ## ProblemChild
 1. https://www.elastic.co/blog/discovering-anomalous-patterns-based-on-parent-child-process-relationships
