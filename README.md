@@ -14,6 +14,7 @@
   ```
   python scoring.py <path to new dataset> <model path> <output path>
   ```
+  5. CSV output contain communities of unusual processes
 
 ## Adversary emulation tools
  1. https://pentestit.com/adversary-emulation-tools-list/
