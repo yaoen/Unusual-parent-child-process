@@ -40,6 +40,7 @@ Tools used to generate datasets
  4. Sysmon logs can be saved as csv
  5. Sysmon configuration file can be modified to include other events
 
-## ProblemChild
+## Acknowledgements
+ProblemChild
 1. https://www.elastic.co/blog/discovering-anomalous-patterns-based-on-parent-child-process-relationships
 2. https://docs.google.com/presentation/d/1bcdBzxedIDwgAgXJr3LGfIaauk_YnCw3z562N1jYEzE/edit#slide=id.g63334c1b1d_0_446
