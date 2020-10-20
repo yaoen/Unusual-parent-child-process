@@ -6,19 +6,22 @@
   git clone https://github.com/yaoen/Unusual-parent-child-process.git
   ```
   2. Unzip dataset.zip for training datasets
-  3. Run the training.py script to train the model
+  3. Unzip test_dataset.zip for testing datasets
+  4. Run the training.py script to train the model
   ```
   python training.py <path to training dataset> <model output path>
   ```
-  4. Run the scoring.py script to score on new dataset
+  5. Run the scoring.py script to score on new dataset
   ```
   python scoring.py <path to new dataset> <model path> <output path>
   ```
-  5. CSV output contain communities of unusual processes
+  6. CSV output contain communities of unusual processes
 
 ## Adversary emulation tools
+Tools used to generate datasets
  1. https://pentestit.com/adversary-emulation-tools-list/
- 2. https://github.com/infosecn1nja/Red-Teaming-Toolkit
+## Additional tools
+ 1. https://github.com/infosecn1nja/Red-Teaming-Toolkit
  
  ## Sysmon
  1. Download Sysmon
