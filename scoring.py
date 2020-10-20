@@ -1,6 +1,5 @@
 import sys
 import pandas as pd
-from networkx.algorithms import community
 from helper_functions import get_utctime
 from helper_functions import get_image_path
 from helper_functions import get_process
@@ -15,6 +14,9 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.preprocessing import MultiLabelBinarizer
 import pickle
 import numpy as np
+from networkx.algorithms import community
+import matplotlib.pyplot as plt
+import networkx as nx
 
 score_dataframe = pd.DataFrame()
 
@@ -204,7 +206,7 @@ tfidf_vectorizer_vectors.todense()
 vec = pd.DataFrame(tfidf_vectorizer_vectors.todense())
 
 
-# rearrange columns
+# rearrange columns, first 33 columns not used in training
 score_dataframe = score_dataframe[
     [
         "eventtype",
@@ -280,10 +282,6 @@ score_dataframe["anomalous_score"] = score_dataframe.apply(
 )
 
 # plot graph
-from networkx.algorithms import community
-import matplotlib.pyplot as plt
-import networkx as nx
-
 edges = []
 attributes = {}
 edge_labels_dict = {}
@@ -302,7 +300,7 @@ for index, rows in score_dataframe.iterrows():
 # nx.set_node_attributes(G, attributes)
 G.add_edges_from(edges)
 pos = nx.spring_layout(G)
-plt.figure(figsize=(25, 15))
+#plt.figure(figsize=(25, 15))
 nx.draw(
     G,
     pos,
@@ -318,17 +316,13 @@ nx.draw_networkx_edge_labels(
     G, pos, edge_labels=edge_labels_dict, font_color="red"
 )
 nx.draw_networkx_edges(G, pos, edgelist=edge_labels_dict, arrows=True)
-plt.axis("off")
-plt.show()
+#plt.axis("off")
+#plt.show()
 
 # determine threshold
 sorted_threshold = sorted(threshold_plot, reverse=False)
 new_list = score_dataframe["anomalous_score"].tolist()
 arr = np.array(new_list)
-# threshold = np.percentile(arr, 75)
-
-# mean = np.mean(arr)
-# sorted_threshold = [i for i in sorted_threshold if i >= mean]
 plt.bar(range(len(sorted_threshold)), sorted_threshold)
 plt.show()
 
@@ -341,11 +335,8 @@ for a, b in zip(sorted_threshold, sorted_threshold[1:]):
         max_diff = diff
         max_elem_1 = b
         max_elem_2 = a
-print(max_diff)
-print(max_elem_1)
-print(max_elem_2)
-
 threshold = max_elem_2
+print("Threshold: "+str(threshold))
 
 # community detection
 # girvan_newman computes communities based on centrality notions
