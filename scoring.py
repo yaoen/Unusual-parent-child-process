@@ -1,20 +1,26 @@
 import sys
 import pandas as pd
-from helper_functions import get_utctime
-from helper_functions import get_image_path
-from helper_functions import get_process
-from helper_functions import get_value
-from helper_functions import get_commandline_arg
-from helper_functions import get_entrophy
-from helper_functions import calc_runtime
-from helper_functions import prevalence_engine
-from helper_functions import anomalous_score
-from sklearn.preprocessing import LabelBinarizer
+
+from helper_functions import (
+    get_utctime,
+    get_image_path,
+    get_process,
+    get_value,
+    get_commandline_arg,
+    get_entrophy,
+    onehotencode_integrity_level,
+    calc_runtime,
+    prevalence_engine,
+    anomalous_score,
+)
+from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
+
 import pickle
 import numpy as np
 from networkx.algorithms import community
 import matplotlib.pyplot as plt
 import networkx as nx
+import os
 
 score_dataframe = pd.DataFrame()
 
@@ -24,7 +30,8 @@ output_file_path = sys.argv[3]
 df = pd.read_csv(input_file_path, header=1)
 
 # Load model
-model = pickle.load(open(input_model_path + "\\model.pkl", "rb"))
+
+model = pickle.load(open(os.path.join(input_model_path, "model.pkl"), "rb"))
 
 # Terminated processes
 terminated_df = df
@@ -177,7 +184,9 @@ score_dataframe = score_dataframe.append(final_data)
 score_dataframe["parent_child_process"] = score_dataframe[
     ["parent_process", "child_process"]
 ].values.tolist()
-mlb = pickle.load(open(input_model_path + "\\mlb.pkl", "rb"))
+
+mlb = pickle.load(open(os.path.join(input_model_path, "mlb.pkl"), "rb"))
+
 new_parent_child_process_df = pd.DataFrame(
     mlb.transform(score_dataframe["parent_child_process"]),
     columns=mlb.classes_,
@@ -194,7 +203,11 @@ for i in range(0, len(child_corpus)):
     parent_child_corpus.append(parent_child)
 
 # load vectorizer from pickle
-tfidf_vectorizer_vector = pickle.load(open(input_model_path + "\\commandline.pkl", "rb"))
+
+tfidf_vectorizer_vector = pickle.load(
+    open(os.path.join(input_model_path, "commandline.pkl"), "rb")
+)
+
 tfidf_vectorizer_vectors = tfidf_vectorizer_vector.transform(
     parent_child_corpus
 )
@@ -271,9 +284,13 @@ score_dataframe["weight"] = model.predict_proba(xnew)[:, 1]
 total_num_process = len(score_dataframe)
 score_dataframe["prevalence_score"] = score_dataframe.apply(
     lambda x: prevalence_engine(
-        x["parent_process"], x["child_process"], x["commandline"], score_dataframe, total_num_process
+        x["parent_process"],
+        x["child_process"],
+        x["commandline"],
+        score_dataframe,
+        total_num_process,
     ),
-    axis=1
+    axis=1,
 )
 score_dataframe["anomalous_score"] = score_dataframe.apply(
     lambda x: anomalous_score(x["weight"], x["prevalence_score"]), axis=1
@@ -392,6 +409,15 @@ for c in community_list:
         df["percentage_anomalous_over_total"] = perc
         output_df = output_df.append(df)
 
-output_df[["percentage_anomalous_over_total"]] = output_df[["percentage_anomalous_over_total"]].astype(float)
-output_df = output_df.sort_values(["percentage_anomalous_over_total"], ascending=[False])
-output_df.to_csv(output_file_path + "\\output.csv", index=False)
+output_df[["percentage_anomalous_over_total"]] = output_df[
+    ["percentage_anomalous_over_total"]
+].astype(float)
+output_df = output_df.sort_values(
+    ["percentage_anomalous_over_total"], ascending=[False]
+)
+
+# mkdir if output path doesn't exist
+if os.path.exists(output_file_path) == False:
+    os.mkdir(output_file_path)
+output_df.to_csv(os.path.join(output_file_path, "output.csv"), index=False)
+

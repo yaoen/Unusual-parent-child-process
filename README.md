@@ -10,14 +10,20 @@
   pip install -r requirements.txt
   ```
   3. Unzip dataset.zip for training datasets
+  ```
+  unzip dataset.zip -d dataset
+  ```
   4. Unzip test_dataset.zip for testing datasets
+  ```
+  unzip test_dataset.zip -d test_dataset
+  ```
   5. Run the training.py script to train the model
   ```
-  python training.py <path to training dataset> <model output path>
+  python training.py <path to training dataset folder> <model output path>
   ```
   6. Run the scoring.py script to score on new dataset
   ```
-  python scoring.py <path to new dataset> <model path> <output path>
+  python scoring.py <path to new dataset (csv file)> <model path> <output path>
   ```
   7. CSV output contain communities of unusual processes
 

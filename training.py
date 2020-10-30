@@ -1,25 +1,37 @@
 import sys
 import os
 import pandas as pd
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 from sklearn.utils import shuffle
 from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
-from helper_functions import get_utctime
-from helper_functions import get_image_path
-from helper_functions import get_process
-from helper_functions import get_value
-from helper_functions import get_commandline_arg
-from helper_functions import get_entrophy
-from helper_functions import calc_runtime
+
+from sklearn.model_selection import (
+    train_test_split,
+    cross_val_score,
+    StratifiedKFold,
+)
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    accuracy_score,
+    roc_curve,
+    auc,
+)
+from helper_functions import (
+    get_utctime,
+    get_image_path,
+    get_process,
+    get_value,
+    get_commandline_arg,
+    get_entrophy,
+    onehotencode_integrity_level,
+    calc_runtime,
+)
+import itertools as it
+
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import roc_curve, auc
 
 input_file_path = sys.argv[1]
 output_path = sys.argv[2]
@@ -29,7 +41,7 @@ for filename in os.listdir(input_file_path):
         label = 0
     else:
         label = 1
-    df = pd.read_csv(input_file_path + "\\" + filename, header=1)
+    df = pd.read_csv(os.path.join(input_file_path, filename), header=1)
 
     # Terminated processes
     terminated_df = df
@@ -199,56 +211,61 @@ parent_child_process_df = pd.DataFrame(
 )
 parent_child_process_df.add_prefix("process_name_")
 
+# mkdir if output path doesn't exist
+if os.path.exists(output_path) == False:
+    os.mkdir(output_path)
 # save mlb
-pickle.dump(mlb, open(output_path + "\\mlb.pkl", "wb"))
+
+pickle.dump(mlb, open(os.path.join(output_path, "mlb.pkl"), "wb"))
 
 # rearrange columns
-dataframe = dataframe[[
-	"eventtype",
-	"rulename",
-	"utctime",
-	"termination_time",
-	"processguid",
-	"processid",
-	"image",
-	"fileversion",
-	"description",
-	"product",
-	"company",
-	"originalfilename",
-	"commandline",
-	"currentdirectory",
-	"user",
-	"logonguid",
-	"loginid",
-	"terminalsessionid",
-	"integritylevel",
-	"hashes",
-	"parentprocessguid",
-	"parentprocessid",
-	"parentimage",
-	"parentcommandline",
-	"creation_time",
-	"child_path",
-	"child_process",
-	"child_commandline_args",
-	"parent_processid",
-	"parent_path",
-	"parent_process",
-	"parent_child_process",
-	"parent_commandline_args",
-	"entrophy_child_name",
-	"entrophy_parent_name",
-	"entrophy_child_commandline",
-	"entrophy_parent_commandline",
-	"Low",
-	"Medium",
-	"High",
-	"System",
-	"AppContainer",
-	"runtime",
-	"label",
-]
+dataframe = dataframe[
+    [
+        "eventtype",
+        "rulename",
+        "utctime",
+        "termination_time",
+        "processguid",
+        "processid",
+        "image",
+        "fileversion",
+        "description",
+        "product",
+        "company",
+        "originalfilename",
+        "commandline",
+        "currentdirectory",
+        "user",
+        "logonguid",
+        "loginid",
+        "terminalsessionid",
+        "integritylevel",
+        "hashes",
+        "parentprocessguid",
+        "parentprocessid",
+        "parentimage",
+        "parentcommandline",
+        "creation_time",
+        "child_path",
+        "child_process",
+        "child_commandline_args",
+        "parent_processid",
+        "parent_path",
+        "parent_process",
+        "parent_child_process",
+        "parent_commandline_args",  # default features
+        "entrophy_child_name",
+        "entrophy_parent_name",
+        "entrophy_child_commandline",
+        "entrophy_parent_commandline",
+        "Low",
+        "Medium",
+        "High",
+        "System",
+        "AppContainer",
+        "runtime",
+        "label",
+    ]
 ]
 
 # tf idf commandline args
@@ -272,7 +289,11 @@ tfidf_vectorizer_vectors.todense()
 vec = pd.DataFrame(tfidf_vectorizer_vectors.todense())
 
 # save tfidf
-pickle.dump(tfidf_vectorizer_vector, open(output_path + "\\commandline.pkl", "wb"))
+pickle.dump(
+    tfidf_vectorizer_vector,
+    open(os.path.join(output_path, "commandline.pkl"), "wb"),
+)
+
 
 # join onehotencode df + tf idf dataframe to dataframe
 dataframe = pd.concat([dataframe, parent_child_process_df], axis=1)
@@ -319,4 +340,5 @@ fpr, tpr, thresholds = roc_curve(y_test, y_score, pos_label=1)
 roc_auc = auc(fpr, tpr)
 print("roc_auc:" + str(roc_auc))
 
-pickle.dump(model, open(output_path + "\\model.pkl", "wb"))
+pickle.dump(model, open(os.path.join(output_path, "model.pkl"), "wb"))
+
