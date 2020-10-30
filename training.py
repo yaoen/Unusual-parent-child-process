@@ -1,14 +1,10 @@
 import sys
 import os
-import matplotlib.pyplot as plt
-import networkx as nx
-from sklearn import preprocessing
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 from sklearn.utils import shuffle
 from xgboost import XGBClassifier
+
 from sklearn.model_selection import (
     train_test_split,
     cross_val_score,
@@ -33,6 +29,7 @@ from helper_functions import (
     calc_runtime,
 )
 import itertools as it
+
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -218,6 +215,7 @@ parent_child_process_df.add_prefix("process_name_")
 if os.path.exists(output_path) == False:
     os.mkdir(output_path)
 # save mlb
+
 pickle.dump(mlb, open(os.path.join(output_path, "mlb.pkl"), "wb"))
 
 # rearrange columns
@@ -296,6 +294,7 @@ pickle.dump(
     open(os.path.join(output_path, "commandline.pkl"), "wb"),
 )
 
+
 # join onehotencode df + tf idf dataframe to dataframe
 dataframe = pd.concat([dataframe, parent_child_process_df], axis=1)
 vec.reset_index(drop=True, inplace=True)
@@ -342,3 +341,4 @@ roc_auc = auc(fpr, tpr)
 print("roc_auc:" + str(roc_auc))
 
 pickle.dump(model, open(os.path.join(output_path, "model.pkl"), "wb"))
+

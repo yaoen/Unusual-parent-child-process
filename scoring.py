@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+
 from helper_functions import (
     get_utctime,
     get_image_path,
@@ -13,6 +14,7 @@ from helper_functions import (
     anomalous_score,
 )
 from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
+
 import pickle
 import numpy as np
 from networkx.algorithms import community
@@ -28,6 +30,7 @@ output_file_path = sys.argv[3]
 df = pd.read_csv(input_file_path, header=1)
 
 # Load model
+
 model = pickle.load(open(os.path.join(input_model_path, "model.pkl"), "rb"))
 
 # Terminated processes
@@ -181,7 +184,9 @@ score_dataframe = score_dataframe.append(final_data)
 score_dataframe["parent_child_process"] = score_dataframe[
     ["parent_process", "child_process"]
 ].values.tolist()
+
 mlb = pickle.load(open(os.path.join(input_model_path, "mlb.pkl"), "rb"))
+
 new_parent_child_process_df = pd.DataFrame(
     mlb.transform(score_dataframe["parent_child_process"]),
     columns=mlb.classes_,
@@ -198,9 +203,11 @@ for i in range(0, len(child_corpus)):
     parent_child_corpus.append(parent_child)
 
 # load vectorizer from pickle
+
 tfidf_vectorizer_vector = pickle.load(
     open(os.path.join(input_model_path, "commandline.pkl"), "rb")
 )
+
 tfidf_vectorizer_vectors = tfidf_vectorizer_vector.transform(
     parent_child_corpus
 )
@@ -308,6 +315,7 @@ for index, rows in score_dataframe.iterrows():
 # nx.set_node_attributes(G, attributes)
 G.add_edges_from(edges)
 pos = nx.spring_layout(G)
+
 # plt.figure(figsize=(25, 15))
 nx.draw(
     G,
@@ -412,3 +420,4 @@ output_df = output_df.sort_values(
 if os.path.exists(output_file_path) == False:
     os.mkdir(output_file_path)
 output_df.to_csv(os.path.join(output_file_path, "output.csv"), index=False)
+
