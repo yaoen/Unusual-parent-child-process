@@ -6,12 +6,10 @@ from helper_functions import get_process
 from helper_functions import get_value
 from helper_functions import get_commandline_arg
 from helper_functions import get_entrophy
-from helper_functions import onehotencode_integrity_level
 from helper_functions import calc_runtime
 from helper_functions import prevalence_engine
 from helper_functions import anomalous_score
 from sklearn.preprocessing import LabelBinarizer
-from sklearn.preprocessing import MultiLabelBinarizer
 import pickle
 import numpy as np
 from networkx.algorithms import community
@@ -26,7 +24,7 @@ output_file_path = sys.argv[3]
 df = pd.read_csv(input_file_path, header=1)
 
 # Load model
-model = pickle.load(open(input_model_path+"\\model.pkl", "rb"))
+model = pickle.load(open(input_model_path + "\\model.pkl", "rb"))
 
 # Terminated processes
 terminated_df = df
@@ -179,7 +177,7 @@ score_dataframe = score_dataframe.append(final_data)
 score_dataframe["parent_child_process"] = score_dataframe[
     ["parent_process", "child_process"]
 ].values.tolist()
-mlb = pickle.load(open(input_model_path+"\\mlb.pkl", "rb"))
+mlb = pickle.load(open(input_model_path + "\\mlb.pkl", "rb"))
 new_parent_child_process_df = pd.DataFrame(
     mlb.transform(score_dataframe["parent_child_process"]),
     columns=mlb.classes_,
@@ -196,7 +194,7 @@ for i in range(0, len(child_corpus)):
     parent_child_corpus.append(parent_child)
 
 # load vectorizer from pickle
-tfidf_vectorizer_vector = pickle.load(open(input_model_path+"\\commandline.pkl", "rb"))
+tfidf_vectorizer_vector = pickle.load(open(input_model_path + "\\commandline.pkl", "rb"))
 tfidf_vectorizer_vectors = tfidf_vectorizer_vector.transform(
     parent_child_corpus
 )
@@ -300,7 +298,8 @@ for index, rows in score_dataframe.iterrows():
 # nx.set_node_attributes(G, attributes)
 G.add_edges_from(edges)
 pos = nx.spring_layout(G)
-#plt.figure(figsize=(25, 15))
+
+# plt.figure(figsize=(25, 15))
 nx.draw(
     G,
     pos,
@@ -316,8 +315,8 @@ nx.draw_networkx_edge_labels(
     G, pos, edge_labels=edge_labels_dict, font_color="red"
 )
 nx.draw_networkx_edges(G, pos, edgelist=edge_labels_dict, arrows=True)
-#plt.axis("off")
-#plt.show()
+# plt.axis("off")
+# plt.show()
 
 # determine threshold
 sorted_threshold = sorted(threshold_plot, reverse=False)
@@ -336,7 +335,7 @@ for a, b in zip(sorted_threshold, sorted_threshold[1:]):
         max_elem_1 = b
         max_elem_2 = a
 threshold = max_elem_2
-print("Threshold: "+str(threshold))
+print("Threshold: " + str(threshold))
 
 # community detection
 # girvan_newman computes communities based on centrality notions
@@ -395,4 +394,4 @@ for c in community_list:
 
 output_df[["percentage_anomalous_over_total"]] = output_df[["percentage_anomalous_over_total"]].astype(float)
 output_df = output_df.sort_values(["percentage_anomalous_over_total"], ascending=[False])
-output_df.to_csv(output_file_path+"\\output.csv", index=False)
+output_df.to_csv(output_file_path + "\\output.csv", index=False)
