@@ -36,6 +36,9 @@ def get_value(value: str) -> str:
 
 
 def get_commandline_arg(commandline: str) -> str:
+    '''
+    splits the command line to get the arguments
+    '''
     commandline = commandline.split(": ", 1)[1]
     commandline = (commandline.replace("\r", "")
         .replace('"', "")
